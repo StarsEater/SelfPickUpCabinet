@@ -1,90 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="2dp"
-    app:cardCornerRadius="4dp"
+    android:orientation="vertical"
     tools:context=".activity.MainActivity">
-    <com.andexert.library.RippleView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/main_scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:background="@drawable/color_cabinet_background">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="vertical">
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@drawable/semicircle"/>
+            android:layout_height="0dp"
+            android:layout_weight="8">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/setting_recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </android.support.v7.widget.RecyclerView>
+</ScrollView>
+        <LinearLayout
+            android:id="@+id/setting_button_set"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_gravity="bottom"
+            android:padding="4dp"
+            android:layout_below="@+id/main_scrollView"
+            android:orientation="horizontal">
                 <Button
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="@color/colorTake"
+                    android:text="我要取件"
+                    android:id="@+id/takeBtn"
                     android:layout_marginRight="5dp"
-                    android:layout_marginTop="15dp"
-                    android:textSize="40sp"
-                    android:textColor="#ffffff"
-                    android:textAlignment="center"
-
-                    android:background="@drawable/color_cabinet_second"
-                    android:text="设置"
-                    android:id="@+id/setBtn"
                     /><!--android:background="#FF0000"-->
 
 
                 <Button
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginRight="3dp"
-                    android:layout_marginLeft="3dp"
-                    android:textSize="40sp"
-                    android:textColor="#ffffff"
-                    android:textAlignment="center"
-                    android:background="@drawable/color_cabinet_forth"
-                    android:text="我要取件"
-                    android:id="@+id/takeBtn"
+                    android:layout_weight="1"
+                    android:background="@color/colorAdd"
+                    android:text="我是快递员"
+                    android:layout_marginRight="5dp"
+                    android:id="@+id/addBtn"
                     />
 
-                <!--android:background="#844200"-->
-
                 <Button
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginBottom="15dp"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
-                    android:textSize="40sp"
-                    android:textColor="#ffffff"
-                    android:textAlignment="center"
-                    android:background="@drawable/color_cabinet_third"
-                    android:text="我是快递员"
-                    android:id="@+id/addBtn"
+                    android:layout_weight="1"
+                    android:background="@drawable/administrator_on"
+                    android:text="我是管理员"
+                    android:id="@+id/setBtn"
                     /><!--android:background="#00A600"-->
-
-                <ImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:background="@drawable/bottom_semicircle"/>
-            </LinearLayout>
-
         </LinearLayout>
-    </com.andexert.library.RippleView>
-</android.support.v7.widget.CardView>
+
+</LinearLayout>

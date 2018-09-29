@@ -2,10 +2,13 @@ package com.qfzj.selfpickupcabinet.activity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
+import com.qfzj.selfpickupcabinet.Adapter.StatusAdapter;
 import com.qfzj.selfpickupcabinet.R;
 import com.qfzj.selfpickupcabinet.bean.BoxStatusBean;
 import com.qfzj.selfpickupcabinet.bean.CabinetBean;
@@ -26,6 +30,7 @@ import com.qfzj.selfpickupcabinet.util.HttpUtil;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,8 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
     Map<String, BoxStatusBean> boxNoToBox;
     Map<String, String> orderNoToBoxNo;
-
+    private ArrayList<BoxStatusBean> boxStatusBeans = new ArrayList<BoxStatusBean>();
+    private GridLayoutManager layoutManager;
+    private RecyclerView setting_recyclerView;
+    private StatusAdapter statusAdapter;
     private static final String TAG = "MainActivity";
+    private Drawable administratorOn ;
+    private Drawable administratorOff ;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -56,14 +67,29 @@ public class MainActivity extends AppCompatActivity {
 
         boxNoToBox = new HashMap<String, BoxStatusBean>();
         orderNoToBoxNo = new HashMap<String, String>();
-
+        administratorOn = this.getResources().getDrawable(R.drawable.administrator_on);
+        administratorOff =this.getResources().getDrawable(R.drawable.administrator_off);
         updateBoxStatus();
+        setting_recyclerView = findViewById(R.id.setting_recyclerView);
+        layoutManager=new GridLayoutManager(this,4);
+        setting_recyclerView.setLayoutManager(layoutManager);
+        statusAdapter = new StatusAdapter(boxStatusBeans,false);
+        UpdateBoxLayoutView(false);
     }
+    /**加载柜子排列视图*/
+    private void UpdateBoxLayoutView(boolean permission){
+        statusAdapter.mStatusList = boxStatusBeans;
+        statusAdapter.misClickable = permission ;
+        setting_recyclerView.setAdapter(statusAdapter);
+
+    }
+
 
     @OnClick({R.id.addBtn, R.id.takeBtn, R.id.setBtn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.addBtn:
+                UpdateBoxLayoutView(false);
                 final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
                 builder.setTitle("您好，请扫描二维码").setIcon(android.R.drawable.ic_dialog_info)
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -71,16 +97,16 @@ public class MainActivity extends AppCompatActivity {
                                 //这里需要扫描二维码，还没写
                                 final String orderNo = "fffff";
 
-                                if(!orderNo.equals("")) {
+                                if (!orderNo.equals("")) {
                                     final BoxStatusBean vacantCabinet = openVacantCabinet("0");
 
-                                    if(vacantCabinet != null) {
+                                    if (vacantCabinet != null) {
                                         AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
                                         builder1.setTitle(vacantCabinet.boxNo + "号柜已打开，请放入物品\n关闭柜门后请点击确定！").setIcon(android.R.drawable.ic_dialog_info)
                                                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int which) {
                                                         //检查该柜门是否关闭
-                                                        if(checkItem(vacantCabinet.boxNo) == 1 && checkDoor(vacantCabinet.boxNo) == 0) {
+                                                        if (checkItem(vacantCabinet.boxNo) == 1 && checkDoor(vacantCabinet.boxNo) == 0) {
                                                             //将订单号与柜子号绑定
                                                             orderNoToBoxNo.put(orderNo, vacantCabinet.boxNo);
 
@@ -88,7 +114,8 @@ public class MainActivity extends AppCompatActivity {
                                                             mBundle.putString("orderNo", orderNo);
                                                             HttpUtil.sendStoreOkHttpRequest(mBundle, new okhttp3.Callback() {
                                                                 @Override
-                                                                public void onResponse(Call call, Response response) throws IOException {}
+                                                                public void onResponse(Call call, Response response) throws IOException {
+                                                                }
 
                                                                 @Override
                                                                 public void onFailure(Call call, IOException e) {
@@ -114,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.show();
                 break;
             case R.id.takeBtn:
+                UpdateBoxLayoutView(false);
                 AlertDialog.Builder builder2 = new AlertDialog.Builder(MainActivity.this);
                 builder2.setTitle("您好，请扫描二维码").setIcon(android.R.drawable.ic_dialog_info)
                         .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -121,16 +149,15 @@ public class MainActivity extends AppCompatActivity {
                                 //这里需要扫描二维码，还没写
                                 final String reservationNo = "fffff";
 
-                                if(!orderNoToBoxNo.containsKey(reservationNo)) {
+                                if (!orderNoToBoxNo.containsKey(reservationNo)) {
                                     Toast.makeText(MainActivity.this, "没有这个柜子，请重新操作", Toast.LENGTH_SHORT).show();
-                                }
-                                else{
+                                } else {
                                     String cabinetNo = orderNoToBoxNo.get(reservationNo);
-                                    if(cabinetNo != null) {
+                                    if (cabinetNo != null) {
                                         BoxStatusBean boxStatusBean = boxNoToBox.get(cabinetNo);
 
-                                        if(boxStatusBean != null) {
-                                            if(boxStatusBean != null && openCabinet(cabinetNo)) {
+                                        if (boxStatusBean != null) {
+                                            if (boxStatusBean != null && openCabinet(cabinetNo)) {
 
                                                 orderNoToBoxNo.remove(reservationNo);
 
@@ -138,7 +165,8 @@ public class MainActivity extends AppCompatActivity {
                                                 mBundle.putString("orderNo", reservationNo);
                                                 HttpUtil.sendWithdrawOkHttpRequest(mBundle, new okhttp3.Callback() {
                                                     @Override
-                                                    public void onResponse(Call call, Response response) throws IOException {}
+                                                    public void onResponse(Call call, Response response) throws IOException {
+                                                    }
 
                                                     @Override
                                                     public void onFailure(Call call, IOException e) {
@@ -155,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
                                                             }
                                                         });
                                                 builder3.show();
-                                            } else  {
+                                            } else {
                                                 Toast.makeText(MainActivity.this, "打开柜子失败！", Toast.LENGTH_SHORT).show();
                                             }
                                         }
@@ -167,25 +195,31 @@ public class MainActivity extends AppCompatActivity {
                 builder2.show();
                 break;
             case R.id.setBtn:
-                AlertDialog.Builder builder4 = new AlertDialog.Builder(MainActivity.this);
-                builder4.setTitle("您好，请扫描二维码").setIcon(android.R.drawable.ic_dialog_info)
-                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        //这里需要扫描二维码，还没写
-                                        String userValidation = "aaa";
+                if (setBtn.getBackground() == administratorOn) {
+                    AlertDialog.Builder builder4 = new AlertDialog.Builder(MainActivity.this);
+                    builder4.setTitle("您好，请扫描二维码").setIcon(android.R.drawable.ic_dialog_info)
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    //这里需要扫描二维码，还没写
+                                    String userValidation = "aaa";
 
-                                        if(userValidation.equals("aaa")) {
-                                            updateBoxStatus();
-                                            Intent intent=new Intent(MainActivity.this,BoxSettingActivity.class);
-                                            intent.putExtra("BoxStatus", (Serializable) boxNoToBox);
-                                            startActivity(intent);
-                                        } else {
-                                            Toast.makeText(MainActivity.this, "管理员验证失败！", Toast.LENGTH_SHORT).show();
-                                        }
-                                        dialog.dismiss();
+                                    if (userValidation.equals("aaa")) {
+                                        setBtn.setBackground(administratorOff);
+                                        updateBoxStatus();
+                                        UpdateBoxLayoutView(true);
+
+                                    } else {
+                                        Toast.makeText(MainActivity.this, "管理员验证失败！", Toast.LENGTH_SHORT).show();
                                     }
-                                });
-                builder4.show();
+                                    dialog.dismiss();
+                                }
+                            });
+                    builder4.show();
+                } else {
+                    updateBoxStatus();
+                    UpdateBoxLayoutView(false);
+                    setBtn.setBackground(administratorOn);
+                }
                 break;
         }
     }
@@ -277,6 +311,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 boxNoToBox.put(key, value);
             }
+        }
+        boxStatusBeans.clear();
+        for (Map.Entry<String, BoxStatusBean> entry: boxNoToBox.entrySet()) {
+            boxStatusBeans.add(entry.getValue());
         }
     }
 }

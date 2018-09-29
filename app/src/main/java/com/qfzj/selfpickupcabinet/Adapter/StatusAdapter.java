@@ -1,6 +1,7 @@
-package com.qfzj.selfpickupcabinet.adapter;
+package com.qfzj.selfpickupcabinet.Adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -16,10 +17,14 @@ import java.util.List;
 
 public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder>{
     private Context mContext;
-    private List<BoxStatusBean> mStatusList;
-
-    public StatusAdapter(List<BoxStatusBean> statusList){
+    public List<BoxStatusBean> mStatusList;
+    public boolean misClickable ;
+    private final String openedColor="#00A600";
+    private final String closedColor="#FF2D2D";
+    private final String errorColor="#FF2D2D";
+    public StatusAdapter(List<BoxStatusBean> statusList,boolean isClickable){
         mStatusList = statusList;
+        misClickable = isClickable;
     }
 
     @Override
@@ -35,28 +40,22 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
     public void onBindViewHolder(final StatusAdapter.ViewHolder holder, int position) {
        final BoxStatusBean boxStatusBean = mStatusList.get(position);
        holder.boxNo.setText(boxStatusBean.boxNo);
-       holder.itemStatus.setImageResource(
-          (boxStatusBean.hasItem==1)?
-                  R.drawable.light_on:
-                   R.drawable.light_off
-       );
-       holder.doorStatus.setImageResource(
-          (boxStatusBean.doorStatus==1)?
-                  R.drawable.door_open:
-                   R.drawable.door_close
-       );
-
-       holder.doorStatus.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               holder.doorStatus.setImageResource(
-                       (boxStatusBean.doorStatusChange()==1)?
-                             R.drawable.door_open:
-                               R.drawable.door_close
-               );
-
-           }
-       });
+        holder.boxNo.setBackgroundColor(
+                boxStatusBean.doorStatus == 1 ?
+                        Color.parseColor(openedColor) :
+                        Color.parseColor(closedColor));
+        if (misClickable) {
+            holder.boxNo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    /**开门或关门**/
+                    holder.boxNo.setBackgroundColor(
+                            boxStatusBean.doorStatusChange() == 1 ?
+                                    Color.parseColor(openedColor) :
+                                    Color.parseColor(closedColor));
+                }
+            });
+        }
     }
 
     @Override
@@ -72,8 +71,6 @@ public class StatusAdapter extends RecyclerView.Adapter<StatusAdapter.ViewHolder
             super(itemView);
             cardView = (CardView) itemView;
             boxNo = itemView.findViewById(R.id.setting_boxNo);
-            doorStatus = itemView.findViewById(R.id.setting_door);
-            itemStatus = itemView.findViewById(R.id.setting_light);
         }
     }
 }
